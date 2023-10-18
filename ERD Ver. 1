@@ -1,6 +1,6 @@
-<mxfile host="app.diagrams.net" modified="2023-10-18T00:22:27.412Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36" etag="T1kcOCGM6TOY_h4yfv0r" version="22.0.4" type="github">
+<mxfile host="app.diagrams.net" modified="2023-10-18T00:39:20.071Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36" etag="o9pcgn2OhCfscDfOgQyz" version="22.0.4" type="github">
   <diagram name="Page-1" id="5cL39lq9Iy0zdDaQFwkk">
-    <mxGraphModel dx="2284" dy="758" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="1322" dy="744" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -118,7 +118,7 @@
         <mxCell id="pCsKScmiGHL-gMnnanl9-42" value="location" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=50;horizontalStack=0;rounded=1;fontSize=14;fontStyle=0;strokeWidth=2;resizeParent=0;resizeLast=1;shadow=0;dashed=0;align=center;arcSize=4;whiteSpace=wrap;html=1;rotation=0;" parent="1" vertex="1">
           <mxGeometry x="290" y="560" width="160" height="200" as="geometry" />
         </mxCell>
-        <mxCell id="pCsKScmiGHL-gMnnanl9-43" value="&lt;u style=&quot;font-weight: bold;&quot;&gt;l_lockey&lt;/u&gt;&lt;br&gt;l_shelfkey&lt;br&gt;l_itemkey&lt;br&gt;l_notes" style="align=left;strokeColor=none;fillColor=none;spacingLeft=4;fontSize=12;verticalAlign=top;resizable=0;rotatable=0;part=1;html=1;" parent="pCsKScmiGHL-gMnnanl9-42" vertex="1">
+        <mxCell id="pCsKScmiGHL-gMnnanl9-43" value="&lt;u style=&quot;font-weight: bold;&quot;&gt;lo_lockey&lt;/u&gt;&lt;br&gt;lo_shelfkey&lt;br&gt;lo_itemkey&lt;br&gt;lo_notes" style="align=left;strokeColor=none;fillColor=none;spacingLeft=4;fontSize=12;verticalAlign=top;resizable=0;rotatable=0;part=1;html=1;" parent="pCsKScmiGHL-gMnnanl9-42" vertex="1">
           <mxGeometry y="50" width="160" height="150" as="geometry" />
         </mxCell>
         <mxCell id="pCsKScmiGHL-gMnnanl9-44" value="shelf" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=50;horizontalStack=0;rounded=1;fontSize=14;fontStyle=0;strokeWidth=2;resizeParent=0;resizeLast=1;shadow=0;dashed=0;align=center;arcSize=4;whiteSpace=wrap;html=1;rotation=0;" parent="1" vertex="1">
