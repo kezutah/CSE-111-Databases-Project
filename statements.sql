@@ -7,13 +7,13 @@ INSERT INTO supplier (sp_suppkey, sp_name, sp_address, sp_notes)
 VALUES(1,'Supplier 1', '123 Example Street', 'first supplier');
 
 --create new customer
-INSERT INTO customer (c_custkey, c_name, c_address, c_rewardpoints, c_notes)
-VALUES(1,'John Smith', '321 Customer Street', 0, 'first customer');
+INSERT INTO customer (c_custkey, c_name, c_address, c_amountspent, c_rewardpoints, c_notes)
+VALUES(1,'John Smith', '321 Customer Street', 0, 0, 'first customer');
 
 --edit available item quantity for a specific item
 UPDATE item
     SET i_quantity  = 1
-    WHERE i_itemkey = 1;
+    WHERE i_itemkey = 2;
 
 
 --update order total based on each lineitem price
@@ -28,6 +28,19 @@ UPDATE orders
 --create new order
 INSERT INTO orders (o_orderkey, o_custkey, o_orderdate, o_status, o_total, o_notes)
 VALUES (1,1,'4-19-2023','incomplete', 0, 'new order');
+
+--create new store
+INSERT INTO store (s_storekey, s_name, s_address, s_balance)
+VALUES (1, 'new store', 'new store addr', 0);
+
+--create new location
+INSERT INTO location (lo_lockey, lo_shelfkey, lo_itemkey, lo_notes)
+VALUES (1,2,3,'location of a shelf');
+
+
+--create new shelf
+INSERT INTO shelf (sh_shelfkey, sh_notes)
+VALUES (1, 'new shelf');
 
 --create new transfer
 INSERT INTO transfer (t_trankey, t_storekey, t_orderdate, t_status, t_notes)
@@ -82,3 +95,13 @@ UPDATE location, shelf
 SELECT i_quantity
     FROM item
     WHERE i_itemkey = 1;
+
+
+--remove an item from warehouse via itemkey
+DELETE FROM item
+    WHERE i_itemkey = 1;
+
+--remove an item from warehouse via type and color
+DELETE FROM item
+    WHERE i_type = 1
+        AND i_color = 2;
