@@ -89,6 +89,7 @@ def check_shelf_loc(_conn):
         print(e)
 
 def check_item_qty(_conn):
+    # Checks item quantity for one item
     sql = """
             SELECT
                 i_quantity
@@ -112,6 +113,7 @@ def check_item_qty(_conn):
         print(e)
 
 def check_order_status(_conn):
+    # Checks status of one order for one customer
     sql = """
         SELECT
             o_status
@@ -136,6 +138,28 @@ def check_order_status(_conn):
     except Error as e:
         print(e)
 
+def check_all_orders(_conn):
+    # Checks date, status, and price total all the orders for any one customer
+    sql = """
+        SELECT
+            *
+        FROM
+            orders
+        WHERE
+            o_custkey = ?;
+        """
+    try:
+        args = []
+        args.append( str(input("Please enter a customer key: ")))
+
+        
+        print("Order # | Date | Status | Total")
+        for row in _conn.execute(sql,args):
+            print(row[0], row[2], row[3], row[4])
+
+
+    except Error as e:
+        print(e)
 
 def Q1(_conn):
     print("++++++++++++++++++++++++++++++++++")
@@ -180,6 +204,7 @@ def main():
             print("2. Update values")
             print("3. Check values")
             print("4. Delete values")
+            print("5. Check tables")
             
             print("'exit' to exit the program")
 
@@ -195,6 +220,7 @@ def main():
                     print("4. Create new order")
 
             elif user_input == "2":
+                # update values is not function at the moment
                 pass
             elif user_input == "3":
 
@@ -231,7 +257,12 @@ def main():
 
 
             elif user_input == "4":
+                # not functional at the moment
                 pass
+                
+            elif user_input == "5":
+                # intended to be to look up a table, not just individual elements
+                check_all_orders(conn)
             elif user_input == "exit":
                 break
             else:
