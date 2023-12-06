@@ -63,7 +63,55 @@ def dropTable(_conn):
     print("++++++++++++++++++++++++++++++++++")
 
 
+def check_shelf_loc(_conn):
+    sql = """
+        SELECT
+            sh_shelfkey
+        FROM
+            shelf, location, item 
+        WHERE
+            i_itemkey = lo_itemkey
+            AND lo_shelfkey = sh_shelfkey
+            AND i_itemkey = ?;
+        """
+    
+    try:
+        args = []
+        args.append( str(input("Please enter an item key: ")))
 
+        
+        print("Shelf Key")
+        for row in _conn.execute(sql,args):
+            print(row[0])
+
+
+    except Error as e:
+        print(e)
+
+def check_order_status(_conn):
+    sql = """
+        SELECT
+            o_status
+        FROM
+            orders
+        WHERE
+            o_orderkey = ?
+            AND o_custkey = ?;
+        """
+    
+    try:
+        args = []
+        args.append( str(input("Please enter an order key: ")))
+        args.append( str(input("Please enter a customer key: ")))
+
+        
+        print("Order Status")
+        for row in _conn.execute(sql,args):
+            print(row[0])
+
+
+    except Error as e:
+        print(e)
 
 
 def Q1(_conn):
@@ -105,11 +153,12 @@ def main():
         while True:
             print("=====[ Warehouse Manager ]=====")
             #list options here
-            print("1. action")
-            print("2. action")
-            print("3. action")
-
-            print("Type 'exit' to exit the program")
+            print("1. Insert values")
+            print("2. Update values")
+            print("3. Check values")
+            print("4. Delete values")
+            
+            print("'exit' to exit the program")
 
             print("Please select an option by inputting the corresponding number")
             user_input = str( input("Selection: ") )
@@ -117,6 +166,38 @@ def main():
             if user_input == "1":
                 pass
             elif user_input == "2":
+                pass
+            elif user_input == "3":
+
+                while True:
+                    print("What would you like to check?")
+                    print("1. Check shelf location of item")
+                    print("2. Check order status")
+                    print("3. Check available qty for an item")
+
+                    print("'back' to go back")
+
+                    print("Please select an option by inputting the corresponding number")
+                    user_input = str( input("Selection: ") )
+
+                    if user_input == "1":
+                        check_shelf_loc(conn)
+                        break
+
+                    elif user_input == "2":
+                        check_order_status(conn)
+                        break
+                    elif user_input == "3":
+                        pass
+                    elif user_input == "back":
+                        break
+                    else:
+                        print("Invalid selection")
+
+
+
+
+            elif user_input == "4":
                 pass
             elif user_input == "exit":
                 break
