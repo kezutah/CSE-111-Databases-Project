@@ -88,6 +88,29 @@ def check_shelf_loc(_conn):
     except Error as e:
         print(e)
 
+def check_item_qty(_conn):
+    sql = """
+            SELECT
+                i_quantity
+            FROM
+                item
+            WHERE
+                i_itemkey = ?;
+        """
+    
+    try:
+        args = []
+        args.append( str(input("Please enter an item key: ")))
+
+        
+        print("Item Quantity")
+        for row in _conn.execute(sql,args):
+            print(row[0])
+
+
+    except Error as e:
+        print(e)
+
 def check_order_status(_conn):
     sql = """
         SELECT
@@ -164,7 +187,13 @@ def main():
             user_input = str( input("Selection: ") )
             
             if user_input == "1":
-                pass
+                while True:
+                    print("What would you like to add?")
+                    print("1. Create new product")
+                    print("2. Add supplier")
+                    print("3. Add new customer")
+                    print("4. Create new order")
+
             elif user_input == "2":
                 pass
             elif user_input == "3":
@@ -187,10 +216,14 @@ def main():
                     elif user_input == "2":
                         check_order_status(conn)
                         break
+
                     elif user_input == "3":
-                        pass
+                        check_item_qty(conn)
+                        break
+
                     elif user_input == "back":
                         break
+
                     else:
                         print("Invalid selection")
 
