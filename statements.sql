@@ -1,14 +1,14 @@
 -- 1. create new product
 INSERT INTO
-    item (i_itemkey, i_suppkey, i_quantity, i_type, i_color)
+    item (i_suppkey, i_quantity, i_type, i_color)
 VALUES
-    (2,1,10,'sweater', 'red');
+    (1,10,'sweater', 'red');
 
 -- 2. add supplier 
 INSERT INTO
-    supplier (sp_suppkey, sp_name, sp_address, sp_notes)
+    supplier (sp_name, sp_address, sp_notes)
 VALUES
-    (1,'Supplier 1', '123 Example Street', 'first supplier');
+    ('Supplier 1', '123 Example Street', 'first supplier');
 
 -- 3. create new customer
 INSERT INTO
