@@ -79,10 +79,11 @@ def create_customer(_conn):
             FROM
                 customer
             WHERE
-                c_name = ?;
+                c_name = ?
+                AND c_address = ?;
         """
 
-        for row in _conn.execute(sql2, args[0]):
+        for row in _conn.execute(sql2, args):
             return row[0] # returns the customers id numbers
 
     except Error as e:
@@ -333,7 +334,7 @@ def check_shelf_loc(_conn):
 def check_avail_item(_conn):
     sql = """
         SELECT
-            i_itemkey, i_quantity, i_type, i_color
+            i_itemkey, i_quantity, i_type, i_color, i_price
         FROM
             item
         WHERE
@@ -343,7 +344,7 @@ def check_avail_item(_conn):
     try:
         print("Item # | Quantity | type | Color")
         for row in _conn.execute(sql):
-            print(row[0], row[2], row[3], row[4])
+            print(row[0], row[1], row[2], row[3], row[4])
 
     except Error as e:
         print(e)
@@ -803,7 +804,7 @@ def main():
             print("Hello customer. What would you like to do?")
             print("What is your customer_id?")
             id = input( str( "If you are a new customer, please type '0': "))
-            if id == 0:
+            if id == '0':
                     # make a new customer entity for this person
                     id = create_customer(conn)
             while True:
