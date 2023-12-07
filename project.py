@@ -163,6 +163,8 @@ def create_order(_conn, custkey=0):
             args.append( str(0) )
 
             _conn.execute(sql_line, args)
+
+            edit_item_quantity(_conn, 0 - int(args[2]), int(args[1]))
             
             again = input("Would you like to order another item (Y / N)? ").lower()
             if again == 'y':
@@ -186,12 +188,12 @@ def create_order(_conn, custkey=0):
 def create_transfer(_conn):
     sql = """
         INSERT INTO transfer (t_storekey, t_orderdate, t_total, t_status)
-        VALUES (?, ?, '2-Incomplete', 0.0)
+        VALUES (?, ?, 0.0, '2-Incomplete')
         """
     
     sql_check = """
             SELECT
-                t_orderkey
+                t_trankey
             FROM
                 transfer
             WHERE
@@ -257,6 +259,8 @@ def create_transfer(_conn):
             args.append( str(0) )
 
             _conn.execute(sql_line, args)
+
+            edit_item_quantity(_conn, 0 - int(args[2]), int(args[1]))
             
             again = input("Would you like to order another item (Y / N)? ").lower()
             if again == 'y':
@@ -280,14 +284,13 @@ def create_transfer(_conn):
 def add_supplier(_conn):
     sql = """
         INSERT INTO
-            supplier (sp_suppkey, sp_name, sp_address, sp_notes)
+            supplier (sp_name, sp_address, sp_notes)
         VALUES
-            (?,?,?,?);
+            (?,?,?);
         """
     
     try:
         args = []
-        args.append( str(input("Enter supplier key: ")))
         args.append( str(input("Enter supplier name: ")))
         args.append( str(input("Enter supplier address: ")))
         args.append( str(input("Enter supplier notes: ")))
@@ -295,7 +298,7 @@ def add_supplier(_conn):
         _conn.execute(sql,args)
         _conn.commit()
         
-        print("Added supplier " + args[1])
+        print("Added supplier " + args[0])
         
 
 
@@ -382,20 +385,45 @@ def check_order_status(_conn):
         FROM
             orders
         WHERE
-            o_orderkey = ?
-            AND o_custkey = ?;
+            o_orderkey = ?;
         """
     
     try:
         args = []
         args.append( str(input("Please enter an order key: ")))
-        args.append( str(input("Please enter a customer key: ")))
 
         
         print("Order Status")
         for row in _conn.execute(sql,args):
             print(row[0])
 
+
+    except Error as e:
+        print(e)
+
+def check_tran_status(_conn, trankey=0):
+    # Checks status of one order for one customer
+    sql = """
+        SELECT
+            t_status
+        FROM
+            transfer
+        WHERE
+            t_trankey = ?;
+        """
+    
+    try:
+        args = []
+        if trankey == 0:
+            args.append( str(input("Please enter a tran key: ")))
+            
+            print("Order Status")
+            for row in _conn.execute(sql,args):
+                print(row[0])
+        else:
+            args.append(str(trankey))
+            for row in _conn.execute(sql,args):
+                return(row[0])
 
     except Error as e:
         print(e)
@@ -429,14 +457,13 @@ def check_all_orders(_conn, custkey=0):
 def create_item(_conn):
     sql = """
         INSERT INTO
-            item (i_itemkey, i_suppkey, i_quantity, i_type, i_color, i_price)
+            item (i_suppkey, i_quantity, i_type, i_color, i_price)
         VALUES
-            (?,?,?,?,?,?);
+            (?,?,?,?,?);
         """
     
     try:
         args = []
-        args.append( str(input("Enter new itemkey: ")))
         args.append( str(input("Please enter a supplier key: ")))
         args.append( str(input("Please enter item's quantity: ")))
         args.append( str(input("Please enter item's type: ")))
@@ -453,27 +480,17 @@ def create_item(_conn):
         print("Please select where to place the item")
         
         sql = """
-            UPDATE
-                location, shelf, item
-            SET
-                sh_shelfkey = ?,
-                lo_lockey = ?,
-                lo_shelfkey = ?
-            WHERE
-                i_itemkey = lo_itemkey
-                AND sh_shelfkey = lo_shelfkey
-                AND i_itemkey = ?;
+            INSERT INTO location (lo_shelfkey, lo_itemkey)
+            VALUES (?, ?)
         """
 
         args = []
         args.append( str(input("Please enter a shelf key: ")))
-        args.append( str(input("Please enter a location key: ")))
-        args.append(args[0])
         args.append(itemkey)
 
         _conn.execute(sql,args)
         _conn.commit()
-        print("Item stored at location " + args[1] + ", shelf " + args[0])
+        print("Item # " + args[1] + " stored at shelf " + args[0] + ".")
 
         
 
@@ -527,10 +544,10 @@ def edit_item_quantity(_conn, amount=0, itemkey=0):
                 FROM
                     item
                 WHERE
-                    i_itemkey = 1
+                    i_itemkey = ?
             ) + ?
         WHERE
-            i_itemkey = 1;
+            i_itemkey = ?;
         """ # for the filling information, the 1st and 3rd argument are the item_id and the 2nd
             # is the amount that we need to add (negative number if subtracting)
 
@@ -540,24 +557,33 @@ def edit_item_quantity(_conn, amount=0, itemkey=0):
         if(amount==0 and itemkey ==0):
             while(True):
                 itemkey = str(input("Please enter a item key: "))
-                amount = str(input("Please enter how much to add or subtract: "))
-                current_amount = check_item_qty(_conn, itemkey)
+                amount = int(input("Please enter how much to add or subtract: "))
+                current_amount = int(check_item_qty(_conn, itemkey))
                 if(amount > 0 or (amount < 0 and current_amount > abs(amount))):
                     args.append( itemkey )
-                    args.append( amount )
+                    args.append( str(amount) )
                     args.append( itemkey )
                     break
                 elif(amount < 0 and current_amount < abs(amount)):
                     print("Insufficient quantity available.")
                 else:
                     run = False
+        else:
+            current_amount = int(check_item_qty(_conn, itemkey))
+            if(amount > 0 or (amount < 0 and current_amount > abs(amount))):
+                args.append( itemkey )
+                args.append( str(amount) )
+                args.append( itemkey )
+            elif(amount < 0 and current_amount < abs(amount)):
+                print("Insufficient quantity available.")
+            else:
+                run = False
 
 
         
         if(run == True):
-            print("Item Quantity")
-            for row in _conn.execute(sql,args):
-                print(row[0])
+            _conn.execute(sql,args)
+
         else:
             print("Something went wrong.")
 
@@ -587,6 +613,34 @@ def edit_order_status (_conn):
         print("Order Status Updated")
         
 
+
+    except Error as e:
+        print(e)
+
+def edit_tran_status (_conn):
+    sql = """
+        UPDATE
+            transfer
+        SET
+            t_status = ?
+        WHERE
+            t_trankey = ?;
+        """
+
+    try:
+        args = []
+        trankey = input("Which transfer (trankey) status would you like to edit? ")
+        print("That transfer's status is currently " + check_tran_status(_conn, trankey) + ".")
+        status = int(input("What status would you like to change it to? "))
+        if status == 1:
+            args.append("1-Complete")
+        elif status == 2:
+            args.append("2-Incomplete")
+        elif status ==3: 
+            args.append("3-Canceled")
+        args.append(str(trankey))
+        _conn.execute(sql,args)
+        _conn.commit()
 
     except Error as e:
         print(e)
@@ -633,8 +687,7 @@ def main():
                 print("1. Insert values")
                 print("2. Update values")
                 print("3. Check values")
-                print("4. Delete values")
-                print("5. Check tables")
+                print("4. Check tables")
                 
                 print("'exit' to exit the program")
 
@@ -677,6 +730,7 @@ def main():
                         print("1. Edit item quantity")
                         print("2. Edit shelf location")
                         print("3. Edit order status")
+                        print("4. Edit transfer status")
 
                         print("'back' to go back")
                         
@@ -693,6 +747,9 @@ def main():
 
                         elif user_input == "3":
                             edit_order_status(conn)
+
+                        elif user_input == "4":
+                            edit_tran_status(conn)
 
                         elif user_input == "back":
                             break
@@ -732,10 +789,6 @@ def main():
                             print("Invalid selection")
 
                 elif user_input == "4":
-                    # not functional at the moment
-                    pass
-                    
-                elif user_input == "5":
                     # intended to be to look up a table, not just individual elements
                     check_all_orders(conn)
 
