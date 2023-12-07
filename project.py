@@ -100,7 +100,8 @@ def create_order(_conn, custkey=0):
                 orders
             WHERE
                 o_custkey = ?
-                AND o_orderdate = ?"""
+                AND o_orderdate = ?
+            """
     
     sql_line = """
             INSERT INTO lineitem (l_orderkey, l_itemkey, l_quantity, l_subtotal, l_discount)
@@ -111,12 +112,27 @@ def create_order(_conn, custkey=0):
                 lineitem
             SET
                 l_subtotal = (
-                    SELECT sum(i_price*l_quantity )
+                    SELECT sum(i_price*l_quantity)
                     FROM lineitem, item
                     WHERE l_orderkey = ? AND l_itemkey = i_itemkey
                 )
             WHERE
-                l_orderkey = ?;"""
+                l_orderkey = ?;
+            """
+    
+    sql_order_update = """
+                    UPDATE
+                        orders
+                    SET
+                        o_total = (
+                            SELECT sum(l_subtotal*(1-l_discount) )
+                            FROM lineitem
+                            WHERE l_orderkey = ?
+                        )
+                    WHERE
+                        o_orderkey = ?;
+                    """
+    
     try:
         args = []
         if custkey == 0:
@@ -140,7 +156,7 @@ def create_order(_conn, custkey=0):
             args.append( str( input("What item (itemkey) would you like to buy? ") ) )
             args.append( str( input("How many would you like to purchase? ") ) )
             avail_qty = check_item_qty(_conn, args[1])
-            while(avail_qty < args[1]):
+            while( avail_qty < int( args[1] ) ):
                 print("There is not enough stock available. There are only " + avail_qty + " available.")
                 args[1] = str( input("How many would you like to purchase? ") )
             args.append( str(0) )
@@ -148,17 +164,21 @@ def create_order(_conn, custkey=0):
 
             _conn.execute(sql_line, args)
             
-            again = input("Would you like to order another item? Y / N").lower()
+            again = input("Would you like to order another item (Y / N)? ").lower()
             if again == 'y':
                 pass
             elif again == 'n':
                 break
 
-        # After all the line items were added, tally up the total
+        # After all the line items were created, tally up their subtotals
         args.clear()
+        # fill the args with 2 orderkeys
         args.append( str( orderkey ) )
         args.append( str( orderkey ) )
         _conn.execute(sql_line_update, args)
+
+        # After all the line items are subtotaled, tally up the order's total
+        _conn.execute(sql_order_update, args) # args still has 2 orderkeys, which is all we need for this query
     except Error as e:
         print(e)
 
