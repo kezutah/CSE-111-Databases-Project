@@ -179,6 +179,101 @@ def create_order(_conn, custkey=0):
 
         # After all the line items are subtotaled, tally up the order's total
         _conn.execute(sql_order_update, args) # args still has 2 orderkeys, which is all we need for this query
+
+    except Error as e:
+        print(e)
+
+def create_transfer(_conn):
+    sql = """
+        INSERT INTO transfer (t_storekey, t_orderdate, t_total, t_status)
+        VALUES (?, ?, '2-Incomplete', 0.0)
+        """
+    
+    sql_check = """
+            SELECT
+                t_orderkey
+            FROM
+                transfer
+            WHERE
+                t_storekey = ?
+                AND t_orderdate = ?
+            """
+
+    sql_line = """
+            INSERT INTO lineitem (l_trankey, l_itemkey, l_quantity, l_subtotal, l_discount)
+            VALUES (?, ?, ?, ?, ?)"""
+
+    sql_line_update = """
+            UPDATE
+                lineitem
+            SET
+                l_subtotal = (
+                    SELECT sum(i_price*l_quantity)
+                    FROM lineitem, item
+                    WHERE l_trankey = ? AND l_itemkey = i_itemkey
+                )
+            WHERE
+                l_trankey = ?;
+            """
+
+    sql_tran_update = """
+                    UPDATE
+                        transfer
+                    SET
+                        t_total = (
+                            SELECT sum(l_subtotal*(1-l_discount) )
+                            FROM lineitem
+                            WHERE l_trankey = ?
+                        )
+                    WHERE
+                        t_trankey = ?;
+                    """
+    try:
+        args = []
+        storekey = input( str("Please type in a store key: ") )
+        args.append( str (storekey) )
+        args.append( str( date.today() ) )
+        trankey = None
+        for row in _conn.execute(sql_check, args):
+            trankey = row[0]
+        if type(trankey) == type(1):
+            pass
+        else:
+            _conn.execute(sql, args)
+            for row in _conn.execute(sql_check, args):
+                trankey = row[0]
+            
+        # create line items to this trankey
+        while(True):
+            args.clear()
+            args.append( str( trankey) )
+            args.append( str( input("What item (itemkey) would you like to transfer? ") ) )
+            args.append( str( input("How many do you need? ") ) )
+            avail_qty = check_item_qty(_conn, args[1])
+            while( avail_qty < int( args[1] ) ):
+                print("There is not enough stock available. There are only " + avail_qty + " available.")
+                args[1] = str( input("How many would you like to purchase? ") )
+            args.append( str(0) )
+            args.append( str(0) )
+
+            _conn.execute(sql_line, args)
+            
+            again = input("Would you like to order another item (Y / N)? ").lower()
+            if again == 'y':
+                pass
+            elif again == 'n':
+                break
+
+        # After all the line items were created, tally up their subtotals
+        args.clear()
+        # fill the args with 2 orderkeys
+        args.append( str( trankey ) )
+        args.append( str( trankey ) )
+        _conn.execute(sql_line_update, args)
+
+        # After all the line items are subtotaled, tally up the transfer's total
+        _conn.execute(sql_tran_update, args)
+
     except Error as e:
         print(e)
 
@@ -547,6 +642,7 @@ def main():
                         print("What would you like to add?")
                         print("1. Create new product")
                         print("2. Add supplier")
+                        print("3. Add a transfer")
                     
                         print("'back' to go back")
 
@@ -561,6 +657,10 @@ def main():
                             add_supplier(conn)
                             break
 
+                        elif user_input == "3":
+                            create_transfer(conn)
+                            break    
+                        
                         elif user_input == "back":
                             break
 
@@ -634,6 +734,7 @@ def main():
                 elif user_input == "5":
                     # intended to be to look up a table, not just individual elements
                     check_all_orders(conn)
+
                 elif user_input == "exit":
                     break
                 else:
