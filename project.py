@@ -88,7 +88,7 @@ def create_customer(_conn):
     except Error as e:
         print(e)
 
-def create_order(_conn, custkey):
+def create_order(_conn, custkey=0):
     sql = """
         INSERT INTO orders (o_custkey, o_orderdate, o_status, o_total)
         VALUES (?, ?, '2-Incomplete', 0)
@@ -101,8 +101,14 @@ def create_order(_conn, custkey):
             WHERE
                 o_custkey = ?
                 AND o_orderdate = ?"""
+    
+    sql_line = """
+            INSERT INTO lineitem (l_orderkey, l_itemkey, l_quantity, l_subtotal, l_discount)
+            VALUES (?, ?, ?, ?, ?)"""
     try:
         args = []
+        if custkey == 0:
+            custkey = input( str("Please type in a customer key: ") )
         args.append( str( custkey ) )
         args.append( str( date.today() ) )
         orderkey = None
@@ -114,6 +120,28 @@ def create_order(_conn, custkey):
             _conn.execute(sql, args)
             for row in _conn.execute(sql_check, args):
                 orderkey = row[0] # by now we have an order created with an orderkey available
+        
+        # create line items to this orderkey
+        while(True):
+            args.clear()
+            args.append( str(orderkey) )
+            args.append( str( input("What item (itemkey) would you like to buy? ") ) )
+            args.append( str( input("How many would you like to purchase? ") ) )
+            avail_qty = check_item_qty(_conn, args[1])
+            while(avail_qty < args[1]):
+                print("There is not enough stock available. There are only " + avail_qty + " available.")
+                args[1] = str( input("How many would you like to purchase? ") )
+            args.append( str(0) )
+            args.append( str(0) )
+            args.append( str(0) )
+
+            _conn.execute(sql_line, args)
+            
+            again = input("Would you like to order another item? Y / N").lower()
+            if again == 'y':
+                pass
+            elif again == 'n':
+                break
     except Error as e:
         print(e)
 
