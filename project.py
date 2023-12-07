@@ -105,6 +105,18 @@ def create_order(_conn, custkey=0):
     sql_line = """
             INSERT INTO lineitem (l_orderkey, l_itemkey, l_quantity, l_subtotal, l_discount)
             VALUES (?, ?, ?, ?, ?)"""
+    
+    sql_line_update = """
+            UPDATE
+                lineitem
+            SET
+                l_subtotal = (
+                    SELECT sum(i_price*l_quantity )
+                    FROM lineitem, item
+                    WHERE l_orderkey = ? AND l_itemkey = i_itemkey
+                )
+            WHERE
+                l_orderkey = ?;"""
     try:
         args = []
         if custkey == 0:
@@ -124,14 +136,13 @@ def create_order(_conn, custkey=0):
         # create line items to this orderkey
         while(True):
             args.clear()
-            args.append( str(orderkey) )
+            args.append( str( orderkey) )
             args.append( str( input("What item (itemkey) would you like to buy? ") ) )
             args.append( str( input("How many would you like to purchase? ") ) )
             avail_qty = check_item_qty(_conn, args[1])
             while(avail_qty < args[1]):
                 print("There is not enough stock available. There are only " + avail_qty + " available.")
                 args[1] = str( input("How many would you like to purchase? ") )
-            args.append( str(0) )
             args.append( str(0) )
             args.append( str(0) )
 
@@ -142,6 +153,12 @@ def create_order(_conn, custkey=0):
                 pass
             elif again == 'n':
                 break
+
+        # After all the line items were added, tally up the total
+        args.clear()
+        args.append( str( orderkey ) )
+        args.append( str( orderkey ) )
+        _conn.execute(sql_line_update, args)
     except Error as e:
         print(e)
 
