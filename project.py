@@ -117,6 +117,31 @@ def create_order(_conn, custkey):
     except Error as e:
         print(e)
 
+def add_supplier(_conn):
+    sql = """
+        INSERT INTO
+            supplier (sp_suppkey, sp_name, sp_address, sp_notes)
+        VALUES
+            (?,?,?,?);
+        """
+    
+    try:
+        args = []
+        args.append( str(input("Enter supplier key: ")))
+        args.append( str(input("Enter supplier name: ")))
+        args.append( str(input("Enter supplier address: ")))
+        args.append( str(input("Enter supplier notes: ")))
+        
+        _conn.execute(sql,args)
+        _conn.commit()
+        
+        print("Added supplier " + args[1])
+        
+
+
+    except Error as e:
+        print(e)
+
 def check_shelf_loc(_conn):
     sql = """
         SELECT
@@ -241,6 +266,89 @@ def check_all_orders(_conn, custkey=0):
     except Error as e:
         print(e)
 
+def create_item(_conn):
+    sql = """
+        INSERT INTO
+            item (i_itemkey, i_suppkey, i_quantity, i_type, i_color)
+        VALUES
+            (?,?,?,?,?);
+        """
+    
+    try:
+        args = []
+        args.append( str(input("Enter new itemkey: ")))
+        args.append( str(input("Please enter a supplier key: ")))
+        args.append( str(input("Please enter item's quantity: ")))
+        args.append( str(input("Please enter item's type: ")))
+        args.append( str(input("Please enter item's color: ")))
+
+
+
+        _conn.execute(sql,args)
+        _conn.commit()
+        print("Item Created")
+        
+        itemkey = args[0]
+        
+        print("Please select a location to place the item into")
+        
+        sql = """
+            UPDATE
+                location, shelf, item
+            SET
+                sh_shelfkey = ?,
+                lo_lockey = ?,
+                lo_shelfkey = ?
+            WHERE
+                i_itemkey = lo_itemkey
+                AND sh_shelfkey = lo_shelfkey
+                AND i_itemkey = ?;
+        """
+
+        args = []
+        args.append( str(input("Please enter a shelf key: ")))
+        args.append( str(input("Please enter a location key: ")))
+        args.append(args[0])
+        args.append(itemkey)
+
+        
+
+
+    except Error as e:
+        print(e)
+
+def change_item_location(_conn):
+    sql = """
+            UPDATE
+                location, shelf, item
+            SET
+                sh_shelfkey = ?,
+                lo_lockey = ?,
+                lo_shelfkey = ?
+            WHERE
+                i_itemkey = lo_itemkey
+                AND sh_shelfkey = lo_shelfkey
+                AND sh_shelfkey = ?
+                AND lo_lockey = ?
+                AND i_itemkey = ?;
+        """
+    
+    try:
+        args = []
+        args.append( str(input("Please enter a new shelf key: ")))
+        args.append( str(input("Please enter a new location key: ")))
+        args.append(args[0])
+        args.append( str(input("Please enter the old shelf key: ")))
+        args.append( str(input("Please enter the old location key: ")))
+        args.append( str(input("Please enter the item's key: ")))
+
+        _conn.execute(sql,args)
+        _conn.commit()
+        print("Item successfully moved to shelf " + args[0] + " at location " + args[1])
+
+    except Error as e:
+        print(e)
+
 def edit_item_quantity(_conn, amount=0, itemkey=0):
     # Edits a given item's quantity.
     # If this function is called with given arguments, simply executes the command
@@ -290,6 +398,32 @@ def edit_item_quantity(_conn, amount=0, itemkey=0):
             print("Something went wrong.")
 
     
+    except Error as e:
+        print(e)
+
+def edit_order_status (_conn):
+    sql = """
+        UPDATE
+            orders
+        SET
+            o_status = ?
+        WHERE
+            o_orderkey = ?
+            AND o_custkey = ?;
+        """
+    
+    try:
+        args = []
+        args.append( str(input("Enter new order status: ")))
+        args.append( str(input("Please enter an order key: ")))
+        args.append( str(input("Please enter a customer key: ")))
+
+        _conn.execute(sql,args)
+        _conn.commit()
+        print("Order Status Updated")
+        
+
+
     except Error as e:
         print(e)
 
@@ -348,8 +482,6 @@ def main():
                         print("What would you like to add?")
                         print("1. Create new product")
                         print("2. Add supplier")
-                        print("3. Add new customer")
-                        print("4. Create new order")
                     
                         print("'back' to go back")
 
@@ -357,13 +489,11 @@ def main():
                         user_input = str( input("Selection: ") )
 
                         if user_input == "1":
-                            edit_item_quantity(conn)
+                            create_item(conn)
                             break
 
                         elif user_input == "2":
-                            break
-
-                        elif user_input == "3":
+                            add_supplier(conn)
                             break
 
                         elif user_input == "back":
@@ -389,10 +519,11 @@ def main():
                             break
 
                         elif user_input == "2":
+                            change_item_location(conn)
                             break
 
                         elif user_input == "3":
-                            break
+                            edit_order_status(conn)
 
                         elif user_input == "back":
                             break
