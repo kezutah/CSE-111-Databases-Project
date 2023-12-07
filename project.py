@@ -269,9 +269,9 @@ def check_all_orders(_conn, custkey=0):
 def create_item(_conn):
     sql = """
         INSERT INTO
-            item (i_itemkey, i_suppkey, i_quantity, i_type, i_color)
+            item (i_itemkey, i_suppkey, i_quantity, i_type, i_color, i_price)
         VALUES
-            (?,?,?,?,?);
+            (?,?,?,?,?,?);
         """
     
     try:
@@ -281,7 +281,7 @@ def create_item(_conn):
         args.append( str(input("Please enter item's quantity: ")))
         args.append( str(input("Please enter item's type: ")))
         args.append( str(input("Please enter item's color: ")))
-
+        args.append( str(input("Please enter item's price: ")))
 
 
         _conn.execute(sql,args)
@@ -290,7 +290,7 @@ def create_item(_conn):
         
         itemkey = args[0]
         
-        print("Please select a location to place the item into")
+        print("Please select where to place the item")
         
         sql = """
             UPDATE
@@ -310,6 +310,10 @@ def create_item(_conn):
         args.append( str(input("Please enter a location key: ")))
         args.append(args[0])
         args.append(itemkey)
+
+        _conn.execute(sql,args)
+        _conn.commit()
+        print("Item stored at location " + args[1] + ", shelf " + args[0])
 
         
 
