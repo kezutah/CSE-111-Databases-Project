@@ -342,9 +342,9 @@ def check_avail_item(_conn):
         """
     
     try:
-        print("Item # | Quantity | type | Color")
+        print("Item # | Quantity | type | Color | Price")
         for row in _conn.execute(sql):
-            print(row[0], row[1], row[2], row[3], row[4])
+            print(str(row[0]) + ' | ' + str(row[1]) + ' | ' + row[2] + ' | ' + row[3] + ' | '+ str(row[4]))
 
     except Error as e:
         print(e)
@@ -655,8 +655,6 @@ def Q1(_conn):
     print("++++++++++++++++++++++++++++++++++")
     print("Q1")
 
-    
-
     try:
         
 
@@ -807,7 +805,8 @@ def main():
             #call functions here
         elif(login.lower() == 'c'):
             print("Hello customer. What would you like to do?")
-            print("What is your customer_id?")
+            for row in conn.execute("SELECT count(*) FROM customer;"):
+                print("What is your customer_id (1-" + str(row[0]) + ")?")
             id = input( str( "If you are a new customer, please type '0': "))
             if id == '0':
                     # make a new customer entity for this person
