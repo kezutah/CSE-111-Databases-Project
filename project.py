@@ -363,7 +363,8 @@ def check_item_qty(_conn, itemkey=0):
     try:
         args = []
         if(itemkey == 0):
-            args.append( str(input("Please enter an item key: ")))
+            for row in _conn.execute("SELECT count(*) FROM item;"):
+                args.append( str(input("Please enter an item key (1-" + row[0] +"): ")))
 
             
             print("Item Quantity")
@@ -388,10 +389,13 @@ def check_order_status(_conn):
         WHERE
             o_orderkey = ?;
         """
+
+    sql_count = "SELECT count(*) FROM orders;"
     
     try:
         args = []
-        args.append( str(input("Please enter an order key: ")))
+        for row in _conn.execute(sql_count):
+            args.append( str(input("Please enter an order key (1 - " + str(row[0]) +"): ")))
 
         
         print("Order Status")
@@ -416,7 +420,8 @@ def check_tran_status(_conn, trankey=0):
     try:
         args = []
         if trankey == 0:
-            args.append( str(input("Please enter a tran key: ")))
+            for row in _conn.execute("SELECT count(*) from transfer;"):
+                args.append( str(input("Please enter a tran key (1- " + str(row[0]) +"): ")))
             
             print("Order Status")
             for row in _conn.execute(sql,args):
